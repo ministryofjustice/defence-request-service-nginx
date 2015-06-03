@@ -19,6 +19,10 @@ RUN apt-get update && apt-get -y upgrade && /usr/local/bin/clean-up-docker-conta
 
 RUN rm -f /etc/nginx/conf.d/default.conf
 
+# The nginx docker container includes symlinks for access.log and error.log to /dev/null
+# while we want useful logs in those locations:
+RUN rm -f /var/log/nginx/access.log /var/log/nginx/error.log
+
 COPY /etc/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY /etc/nginx/conf.d/default-server.conf /etc/nginx/conf.d/default-server.conf
 
