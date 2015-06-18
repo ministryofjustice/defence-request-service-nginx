@@ -48,6 +48,12 @@ server {
     return 200 "User-agent: *\nDisallow: /";
   }
 
+  # Proxy assets from the asset host, which is substituted into this file
+  location ~ /assets/* {
+    rewrite ^/(.*)$ ${ASSET_FRAGMENT_PATH}/$1 break;
+    proxy_pass ${ASSET_URL_PREFIX};
+  }
+
   location @upstream_location {
     # Pass all headers to the host by default
     proxy_pass_request_headers on;
