@@ -1,4 +1,4 @@
-FROM nginx:1.9.1
+FROM nginx:1.9.2
 
 ##############################################################################
 # Copy helper scripts into the container:
@@ -17,13 +17,15 @@ ENV DEBIAN_FRONTEND noninteractive
 ADD .latest-security-upgrades /.latest-security-upgrades
 RUN apt-get update && apt-get -y upgrade && /usr/local/bin/clean-up-docker-container
 
+# Remove the default config file. This is replaced at start time by the "run-nginx" command,
+# which substitutes in environment variables
 RUN rm -f /etc/nginx/conf.d/default.conf
-
-# The nginx docker container includes symlinks for access.log and error.log to /dev/null
-# while we want useful logs in those locations:
-RUN rm -f /var/log/nginx/access.log /var/log/nginx/error.log
+RUN mkdir -p /etc/nginx/conf.d-templates/
 
 COPY /etc/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY /etc/nginx/conf.d/default-server.conf /etc/nginx/conf.d/default-server.conf
+COPY etc/nginx/conf.d-templates/default-server.conf.template /etc/nginx/conf.d-templates/
 
 VOLUME /var/log/nginx
+
+COPY run-nginx /usr/local/bin/run-nginx
+CMD /usr/local/bin/run-nginx
